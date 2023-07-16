@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webpage
+  labels:
+    app: webpage
+spec:
+  selector:
+    matchLabels:
+      app: webpage
+  template:
+    metadata:
+      labels:
+        app: webpage
+    spec:
+      volumes:
+      - name: src
+        hostPath:
+          path: /home/nick/projects/webpage/
+      containers:
+      - name: webpage
+        image: webpage:latest
+        command: ["node"]
+        args: ["/srv/main.js"]
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        volumeMounts:
+        - name: src
+          mountPath: /srv/
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: webpage
+  labels:
+    app: webpage
+spec:
+  selector:
+    app: webpage
+  type: NodePort
+  ports:
+    - name: http
+      targetPort: 80
+      port: 80
+      nodePort: 30080
+    - name: https
+      targetPort: 443
+      port: 443
+      nodePort: 30443
+
